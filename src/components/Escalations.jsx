@@ -84,7 +84,7 @@ function EscalationRow({ escalation: e, onClose, onDelete }) {
               Mark Closed
             </button>
           )}
-          <button className="btn-icon" onClick={(ev) => { ev.stopPropagation(); onDelete(e.id); }}>✕</button>
+          <button className="btn-icon" onClick={(ev) => { ev.stopPropagation(); if (window.confirm('Delete this escalation?')) onDelete(e.id); }}>✕</button>
           <span>{expanded ? '▲' : '▼'}</span>
         </div>
       </div>

@@ -43,7 +43,7 @@ export default function CustomerDetail({ dataHook }) {
   const navigate = useNavigate();
   const {
     data, updateCustomer, deleteCustomer,
-    addMeeting, deleteMeeting,
+    addMeeting, updateMeeting, deleteMeeting,
     addActionItem, updateActionItem, toggleActionItem, deleteActionItem,
     addStakeholder, updateStakeholder, deleteStakeholder,
     addEscalation, closeEscalation, deleteEscalation,
@@ -51,6 +51,7 @@ export default function CustomerDetail({ dataHook }) {
   const customer = data.customers.find((c) => c.id === id);
 
   const [showMeetingForm, setShowMeetingForm] = useState(false);
+  const [editingMeetingId, setEditingMeetingId] = useState(null);
   const [showActionForm, setShowActionForm] = useState(false);
   const [editingActionId, setEditingActionId] = useState(null);
   const [showCompletedActions, setShowCompletedActions] = useState(false);
@@ -133,6 +134,7 @@ export default function CustomerDetail({ dataHook }) {
           <dl className="info-list">
             <dt>Renewal Date</dt><dd>{customer.renewalDate || '—'}</dd>
             <dt>Partner</dt><dd>{customer.partner || '—'}</dd>
+            <dt>RISE</dt><dd>{customer.rise === true ? 'Yes' : customer.rise === false ? 'No' : '—'}</dd>
             <dt>Primary Contact</dt>
             <dd>
               {customer.primaryContact || '—'}
@@ -177,7 +179,7 @@ export default function CustomerDetail({ dataHook }) {
                 onSaveEdit={(changes) => { updateActionItem(id, item.id, changes); setEditingActionId(null); }}
                 onCancelEdit={() => setEditingActionId(null)}
                 onToggle={() => toggleActionItem(id, item.id)}
-                onDelete={() => deleteActionItem(id, item.id)}
+                onDelete={() => { if (window.confirm('Delete this action item?')) deleteActionItem(id, item.id); }}
               />
             ))}
           </ul>
@@ -198,7 +200,7 @@ export default function CustomerDetail({ dataHook }) {
                       onSaveEdit={(changes) => { updateActionItem(id, item.id, changes); setEditingActionId(null); }}
                       onCancelEdit={() => setEditingActionId(null)}
                       onToggle={() => toggleActionItem(id, item.id)}
-                      onDelete={() => deleteActionItem(id, item.id)}
+                      onDelete={() => { if (window.confirm('Delete this action item?')) deleteActionItem(id, item.id); }}
                     />
                   ))}
                 </ul>
@@ -232,6 +234,7 @@ export default function CustomerDetail({ dataHook }) {
         </div>
         {showMeetingForm && (
           <MeetingForm
+            customerName={customer.name}
             onSave={(m) => { addMeeting(id, m); setShowMeetingForm(false); }}
             onCancel={() => setShowMeetingForm(false)}
           />
@@ -240,23 +243,44 @@ export default function CustomerDetail({ dataHook }) {
           {(customer.meetings || []).length === 0 && <p className="empty-state-sm">No meetings recorded.</p>}
           {(customer.meetings || []).map((m) => (
             <div key={m.id} className="meeting-card">
-              <div className="meeting-header" onClick={() => setExpandedMeeting(expandedMeeting === m.id ? null : m.id)}>
-                <div>
-                  <strong>{m.title || 'Meeting'}</strong>
-                  <span className="meeting-date">{m.date}</span>
-                  {m.attendees && <span className="meeting-meta">Attendees: {m.attendees}</span>}
+              {editingMeetingId === m.id ? (
+                <div style={{ padding: 12 }}>
+                  <MeetingForm
+                    initial={m}
+                    saveLabel="Save Changes"
+                    customerName={customer.name}
+                    onSave={(changes) => { updateMeeting(id, m.id, changes); setEditingMeetingId(null); }}
+                    onCancel={() => setEditingMeetingId(null)}
+                  />
                 </div>
-                <div className="meeting-controls">
-                  <span>{expandedMeeting === m.id ? '▲' : '▼'}</span>
-                  <button className="btn-icon" onClick={(e) => { e.stopPropagation(); deleteMeeting(id, m.id); }}>✕</button>
-                </div>
-              </div>
-              {expandedMeeting === m.id && (
-                <div className="meeting-body">
-                  {m.summary && <><h4>Summary</h4><p>{m.summary}</p></>}
-                  {m.actionItems && <><h4>Action Items from Meeting</h4><p>{m.actionItems}</p></>}
-                  {m.nextSteps && <><h4>Next Steps</h4><p>{m.nextSteps}</p></>}
-                </div>
+              ) : (
+                <>
+                  <div className="meeting-header" onClick={() => setExpandedMeeting(expandedMeeting === m.id ? null : m.id)}>
+                    <div>
+                      <strong>{m.title || 'Meeting'}</strong>
+                      <span className="meeting-date">{m.date}</span>
+                      {m.attendees && <span className="meeting-meta">Attendees: {m.attendees}</span>}
+                    </div>
+                    <div className="meeting-controls">
+                      <span>{expandedMeeting === m.id ? '▲' : '▼'}</span>
+                      <button className="btn-icon" title="Edit" onClick={(e) => { e.stopPropagation(); setEditingMeetingId(m.id); setExpandedMeeting(null); }}>✎</button>
+                      <button className="btn-icon" onClick={(e) => { e.stopPropagation(); if (window.confirm('Delete this meeting note?')) deleteMeeting(id, m.id); }}>✕</button>
+                    </div>
+                  </div>
+                  {expandedMeeting === m.id && (
+                    <div className="meeting-body">
+                      {m.summary && <><h4>Summary</h4><p>{m.summary}</p></>}
+                      {m.actionItems && <><h4>Action Items from Meeting</h4><p>{m.actionItems}</p></>}
+                      {m.nextSteps && <><h4>Next Steps</h4><p>{m.nextSteps}</p></>}
+                      {m.rawNotes && (
+                        <details style={{ marginTop: 8 }}>
+                          <summary style={{ cursor: 'pointer', fontSize: 12, color: 'var(--text-muted)' }}>Raw Notes</summary>
+                          <p style={{ marginTop: 6 }}>{m.rawNotes}</p>
+                        </details>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ))}

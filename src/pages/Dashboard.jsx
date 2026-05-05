@@ -5,15 +5,12 @@ import { AddCustomerModal } from '../components/AddCustomerModal';
 
 const STATUS_ORDER = ['at-risk', 'needs-attention', 'healthy'];
 
-export default function Dashboard({ dataHook, search }) {
+export default function Dashboard({ dataHook }) {
   const [showAdd, setShowAdd] = useState(false);
   const navigate = useNavigate();
   const { data, addCustomer } = dataHook;
 
-  const filtered = data.customers
-    .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()) ||
-      (c.primaryContact || '').toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status));
+  const sorted = [...data.customers].sort((a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status));
 
   const counts = {
     healthy: data.customers.filter((c) => c.status === 'healthy').length,
@@ -34,11 +31,11 @@ export default function Dashboard({ dataHook, search }) {
       </div>
 
       <div className="customer-grid">
-        {filtered.map((c) => (
+        {sorted.map((c) => (
           <CustomerCard key={c.id} customer={c} onClick={() => navigate(`/customer/${c.id}`)} />
         ))}
-        {filtered.length === 0 && (
-          <p className="empty-state">No customers found. Add your first customer to get started.</p>
+        {sorted.length === 0 && (
+          <p className="empty-state">No customers yet. Add your first customer to get started.</p>
         )}
       </div>
 

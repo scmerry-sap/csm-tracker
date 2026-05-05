@@ -66,6 +66,21 @@ function CustomerForm({ initial, onSave, onClose, title }) {
           <input className="input" placeholder="e.g. Deloitte, Accenture" value={form.partner} onChange={set('partner')} />
         </Field>
 
+        <Field label="RISE Customer">
+          <div className="rise-toggle">
+            <button
+              type="button"
+              className={`rise-btn ${form.rise ? 'rise-yes' : ''}`}
+              onClick={() => setForm((f) => ({ ...f, rise: true }))}
+            >Yes</button>
+            <button
+              type="button"
+              className={`rise-btn ${form.rise === false ? 'rise-no' : ''}`}
+              onClick={() => setForm((f) => ({ ...f, rise: false }))}
+            >No</button>
+          </div>
+        </Field>
+
         <div className="form-row">
           <Field label="Data & AI Products">
             <input className="input" placeholder="e.g. SAP Datasphere, SAP AI Core" value={form.dataAiProducts} onChange={(e) => setForm((f) => ({ ...f, dataAiProducts: e.target.value }))} />
@@ -97,7 +112,7 @@ function CustomerForm({ initial, onSave, onClose, title }) {
   );
 }
 
-const EMPTY = { name: '', industry: '', arr: '', renewalDate: '', status: 'healthy', csStage: '', partner: '', primaryContact: '', primaryContactEmail: '', dataAiProducts: '', otherProducts: '', notes: '' };
+const EMPTY = { name: '', industry: '', arr: '', renewalDate: '', status: 'healthy', csStage: '', partner: '', rise: null, primaryContact: '', primaryContactEmail: '', dataAiProducts: '', otherProducts: '', notes: '' };
 
 export function AddCustomerModal({ onSave, onClose }) {
   return <CustomerForm initial={EMPTY} onSave={onSave} onClose={onClose} title="Add Customer" />;

@@ -294,7 +294,15 @@ export function loadData() {
 }
 
 export function saveData(data) {
-  localStorage.setItem(DATA_KEY, JSON.stringify(data));
+  const json = JSON.stringify(data);
+  localStorage.setItem(DATA_KEY, json);
+  fetch('http://127.0.0.1:27153/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data, null, 2),
+  }).then((r) => r.json()).then((r) => {
+    if (r.ok) window.dispatchEvent(new CustomEvent('csm-autosaved', { detail: r.savedAt }));
+  }).catch(() => {});
 }
 
 export function exportData() {

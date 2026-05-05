@@ -80,7 +80,7 @@ function StakeholderCard({ s, editing, onEdit, onSaveEdit, onCancelEdit, onDelet
         {s.notes && <span className="stakeholder-notes">{s.notes}</span>}
       </div>
       <button className="btn-icon" title="Edit" onClick={onEdit}>✎</button>
-      <button className="btn-icon" title="Delete" onClick={onDelete}>✕</button>
+      <button className="btn-icon" title="Delete" onClick={() => { if (window.confirm(`Delete ${s.name}?`)) onDelete(); }}>✕</button>
     </div>
   );
 }

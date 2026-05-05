@@ -37,6 +37,14 @@ export function useData() {
     updateCustomer(customerId, { meetings: [newMeeting, ...(customer.meetings || [])] });
   }, [data, updateCustomer]);
 
+  const updateMeeting = useCallback((customerId, meetingId, changes) => {
+    const customer = data.customers.find((c) => c.id === customerId);
+    if (!customer) return;
+    updateCustomer(customerId, {
+      meetings: customer.meetings.map((m) => (m.id === meetingId ? { ...m, ...changes } : m)),
+    });
+  }, [data, updateCustomer]);
+
   const deleteMeeting = useCallback((customerId, meetingId) => {
     const customer = data.customers.find((c) => c.id === customerId);
     if (!customer) return;
@@ -123,6 +131,7 @@ export function useData() {
     updateCustomer,
     deleteCustomer,
     addMeeting,
+    updateMeeting,
     deleteMeeting,
     addActionItem,
     updateActionItem,
